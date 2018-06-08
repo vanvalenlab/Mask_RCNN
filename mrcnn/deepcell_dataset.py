@@ -3,7 +3,7 @@ if __name__ == '__main__':
     # Agg backend runs without a display
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-
+import numpy as np
 import os
 import sys
 import json
@@ -20,19 +20,12 @@ from mrcnn import utils
 class CellDataset(utils.Dataset):
 
     def load_trainingcells(self, dataset_dir):
-        """Load a subset of the nuclei dataset.
-
-        dataset_dir: Root directory of the dataset
+        """
+        dataset_dir: The directory of training images.
         """
         # Add classes. We have one class.
-        # Naming the dataset nucleus, and the class nucleus
+        # Naming the dataset cell, and the class cell
         self.add_class("cell", 1, "cell")
-
-        # Which subset?
-        # "val": use hard-coded list above
-        # "train": use data from stage1_train minus the hard-coded list above
-        # else: use the data from the specified sub-directory
-        #dataset_dir = os.path.join(dataset_dir, subset_dir)
         image_ids = next(os.walk(dataset_dir))[2]
         #To suffle the images just to make sure that any bais due to 
         #generation does not kick in.
@@ -44,6 +37,37 @@ class CellDataset(utils.Dataset):
                 "cell",
                 image_id=image_id,
                 path=os.path.join(dataset_dir,image_id))
+
+    def load_validationcells(self,dataset_dir):
+    	#dataset_dir: The directory of validation images.
+    	self.add_class("cell",1,"cell")
+    	image_ids=next(os.walk(dataset_dir))[2]
+    	image_ids=list(set(image_ids))
+    	for image_id in image_ids:
+    		self.add_image("cell",image_id=image_id,path=os.path.join(dataset_dir,image_id))
+
+    def train_validate_split(self,dataset_dir,ratio=0.7):
+    	#If the validation set needs to be a part of the training data 
+    	#We need to randomly select out of it ,by the ratio=training/validation
+    	image_ids=next(os.walk(dataset_dir))[2]
+    	splitratio=int((1-ratio)*len(image_ids))
+    	train_ids=np.random.choice(image_ids,splitratio)
+    	for i in range(len(train_ids)):
+    		train_ids[i]=str(os.path.join(dataset_dir,train_ids[i]))
+    	#returns the array of images to train
+    	return train_ids
+
+    def train_validate_loadtrain(self,dataset_dir,train_ids):
+    	self.add_class("cell", 1, "cell")
+    	for image_id in train_ids:
+    		self.add_image("cell",image_id=image_id,path=image_id)
+
+    def train_validate_loadval(self,dataset_dir,train_ids):
+    	self.add_class("cell",1,"cell")
+    	image_ids=next(os.walk(dataset_dir))[2]
+    	val_ids=list(set(image_ids)-set(train_ids))
+    	for image_id in val_ids:
+    		self.add_image("cell",image_id=image_id,path=image_id)
 
     def load_mask(self, image_id):
         """Generate instance masks for an image.
@@ -84,7 +108,7 @@ class CellDataset(utils.Dataset):
     def image_reference(self, image_id):
         """Return the path of the image."""
         info = self.image_info[image_id]
-        if info["source"] == "nucleus":
+        if info["source"] == "cell":
             return info["id"]
         else:
             super(self.__class__, self).image_reference(image_id)
