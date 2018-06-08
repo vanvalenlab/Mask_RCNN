@@ -11,6 +11,7 @@ import datetime
 import numpy as np
 import skimage.io
 import cv2
+from scipy.ndimage.measurements import label
 ROOT_DIR = os.path.abspath("../")
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
