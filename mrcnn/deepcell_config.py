@@ -10,6 +10,7 @@ import json
 import datetime
 import numpy as np
 import skimage.io
+import numpy as np
 ROOT_DIR = os.path.abspath("../")
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
