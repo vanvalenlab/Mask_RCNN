@@ -762,7 +762,7 @@ def compute_ap_range(gt_box, gt_class_id, gt_mask,
     """Compute AP over a range or IoU thresholds. Default range is 0.5-0.95."""
     # Default is 0.5 to 0.95 with increments of 0.05
     iou_thresholds = iou_thresholds or np.arange(0.5, 1.0, 0.05)
-    
+
     # Compute AP over range of IoU thresholds
     AP = []
     for iou_threshold in iou_thresholds:
@@ -887,3 +887,17 @@ def denorm_boxes(boxes, shape):
     scale = np.array([h - 1, w - 1, h - 1, w - 1])
     shift = np.array([0, 0, 1, 1])
     return np.around(np.multiply(boxes, scale) + shift).astype(np.int32)
+
+
+
+### matplotlib
+def get_ax(rows=1, cols=1, size=8):
+    """Return a Matplotlib Axes array to be used in
+    all visualizations in the notebook. Provide a
+    central point to control graph sizes.
+
+    Change the default size attribute to control the size
+    of rendered images
+    """
+    _, ax = plt.subplots(rows, cols, figsize=(size*cols, size*rows))
+    return ax

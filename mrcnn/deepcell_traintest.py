@@ -16,7 +16,7 @@ ROOT_DIR = os.path.abspath("../")
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
 from mrcnn.config import Config
-from mrcnn.deepcell_config import CellConfig 
+from mrcnn.deepcell_config import CellConfig
 from mrcnn.deepcell_dataset import CellDataset
 from mrcnn.deepcell_inference import InferenceConfig
 from mrcnn import utils
@@ -30,12 +30,12 @@ def train_model_withvalidation(model,dataset_dir,validation_dir,nepoch=40,config
     """Train the model."""
     # Training dataset.
     dataset_train = CellDataset()
-    dataset_train.trainingcells(dataset_dir)
+    dataset_train.load_trainingcells(dataset_dir)
     dataset_train.prepare()
 
     # Validation dataset
     dataset_val = CellDataset()
-    dataset_val.validationcells(dataset_dir)
+    dataset_val.load_validationcells(dataset_dir)
     dataset_val.prepare()
 
     # Image augmentation
@@ -65,10 +65,10 @@ def train_model_withvalidation(model,dataset_dir,validation_dir,nepoch=40,config
                 layers='all')
 
 def train_model(model,dataset_dir,nepoch=40,train_val_ratio=0.7,config=CellConfig(),datasetclass=CellDataset):
-	dataset_train = datasetclass()
-	#Finding out the most the images which would go as training.
-	train_ids=dataset_train.train_validate_split(dataset_dir,train_val_ratio)
-	dataset_train.train_validate_loadtrain(dataset_dir,train_ids)
+    dataset_train = datasetclass()
+    #Finding out the most the images which would go as training.
+    train_ids=dataset_train.train_validate_split(dataset_dir,train_val_ratio)
+    dataset_train.train_validate_loadtrain(dataset_dir,train_ids)
     dataset_train.prepare()
 
     #Validation dataset
@@ -103,17 +103,17 @@ def train_model(model,dataset_dir,nepoch=40,train_val_ratio=0.7,config=CellConfi
 
 
 def test(model,testset_dir,model_path=DEFAULT_MODEL_PATH):
-	assert model_path != "", "Provide path to trained weights(The .h5 files)"
-	print("Loading weights from: ", model_path)
-	model.load_weights(model_path, by_name=True)
-	test_ids=next(os.walk(testset_dir))[2]
-	answers=[]
-	for i in range(len(test_ids)):
-		frame=cv2.imread(os.path.join(testset_dir,test_ids[i]))
-		results = model.detect([frame], verbose=0)
-		r = results[0]
-		answers.append(r)
-	return answers
+    assert model_path != "", "Provide path to trained weights(The .h5 files)"
+    print("Loading weights from: ", model_path)
+    model.load_weights(model_path, by_name=True)
+    test_ids=next(os.walk(testset_dir))[2]
+    answers=[]
+    for i in range(len(test_ids)):
+        frame=cv2.imread(os.path.join(testset_dir,test_ids[i]))
+        results = model.detect([frame], verbose=0)
+        r = results[0]
+        answers.append(r)
+    return answers
 
 
 def random_colors(N):
@@ -121,6 +121,7 @@ def random_colors(N):
     colors = [tuple(255 * np.random.rand(3)) for _ in range(N)]
     return colors
 
+class_names = ['BG', 'Cell']
 
 colors = random_colors(len(class_names))
 class_dict = {
@@ -166,24 +167,24 @@ def display_instances(image, boxes, masks, ids, names, scores):
     return image
 
 def masked_image(model,image_path):
-	frame=cv2.imread(image_path)
-	results = model.detect([frame], verbose=0)
-	r = results[0]
-	frame = display_instances(frame, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
-	return frame
+    frame=cv2.imread(image_path)
+    results = model.detect([frame], verbose=0)
+    r = results[0]
+    frame = display_instances(frame, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+    return frame
 
 def autotrain(dataset_dir,nepoch,model_dir=".",resume=False):
-	print("Sit back, Relax! Your training would be taken care of!")
-	print("The .h5(model) file would go to "+str(os.path.abspath(model_dir)))
-	model = modellib.MaskRCNN(mode="training", config=CellConfig(),model_dir=model_dir)
-	if resume == False:
-    	model.load_weights(model.get_imagenet_weights(), by_name=True)
+    print("Sit back, Relax! Your training would be taken care of!")
+    print("The .h5(model) file would go to "+str(os.path.abspath(model_dir)))
+    model = modellib.MaskRCNN(mode="training", config=CellConfig(),model_dir=model_dir)
+    if resume == False:
+        model.load_weights(model.get_imagenet_weights(), by_name=True)
     else:
-    	model.load_weights(model.find_last()[1], by_name=True)
-	dataset_train = CellDataset()
-	#Finding out the most the images which would go as training.
-	train_ids=dataset_train.train_validate_split(dataset_dir,0.7)
-	dataset_train.train_validate_loadtrain(dataset_dir,train_ids)
+        model.load_weights(model.find_last()[1], by_name=True)
+    dataset_train = CellDataset()
+    #Finding out the most the images which would go as training.
+    train_ids=dataset_train.train_validate_split(dataset_dir,0.7)
+    dataset_train.train_validate_loadtrain(dataset_dir,train_ids)
     dataset_train.prepare()
 
     #Validation dataset
@@ -219,23 +220,23 @@ def autotrain(dataset_dir,nepoch,model_dir=".",resume=False):
 
 
 def autotest(testimage_path,model_path="."):
-	model = modellib.MaskRCNN(mode="inference", 
+    model = modellib.MaskRCNN(mode="inference",
                           config=InferenceConfig(),
                           model_dir=model_path)
-	model_path = model.find_last()[1]
-	model.load_weights(model_path, by_name=True)
-	image1=cv2.imread(testimage_path)
-	results = model.detect([image1], verbose=0)
-	r = results[0]
-	frame = display_instances(frame, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
-	return frame
+    model_path = model.find_last()[1]
+    model.load_weights(model_path, by_name=True)
+    image1=cv2.imread(testimage_path)
+    results = model.detect([image1], verbose=0)
+    r = results[0]
+    frame = display_instances(frame, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+    return frame
 
 
 def autotest_mymodel(testimage_path,model_path):
-	model = modellib.MaskRCNN(mode="inference", config=InferenceConfig(),model_dir=model_path)
-	model.load_weights(model_path, by_name=True)
-	image1=cv2.imread(testimage_path)
-	results = model.detect([image1], verbose=0)
-	r = results[0]
-	frame = display_instances(frame, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
-	return frame
+    model = modellib.MaskRCNN(mode="inference", config=InferenceConfig(),model_dir=model_path)
+    model.load_weights(model_path, by_name=True)
+    image1=cv2.imread(testimage_path)
+    results = model.detect([image1], verbose=0)
+    r = results[0]
+    frame = display_instances(frame, r['rois'], r['masks'], r['class_ids'], class_names, r['scores'])
+    return frame
