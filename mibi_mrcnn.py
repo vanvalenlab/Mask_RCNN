@@ -27,9 +27,12 @@ TRAIN_DIR = '/Mask_RCNN/data/raw_train'
 VAL_DIR = '/Mask_RCNN/data/raw_test'
 MASK_DIR = '/Mask_RCNN/data/annotated'
 MODEL_DIR = '/Mask_RCNN/models'
+OUTPUT_DIR = 'Mask_RCNN/output'
+
 COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
-
+TEST_IMAGE_1 = 'crop14_dsDNA1.tif'
+TEST_IMAGE_2 = 'crop14_dsDNA2.tif'
 
 config = CellConfig()
 ##config.display()
@@ -49,12 +52,12 @@ def init_model():
                                 "mrcnn_bbox", "mrcnn_mask"])
 
 if __name__ == '__main__':
+    #parse command line input to either train or run mrcnn
     parser = argparse.ArgumentParser()
     parser.add_argument('command', type=str, choices=['train', 'run', 'export'],
                         help='train or run models')
     parser.add_argument('-o', '--overwrite', action='store_true', dest='overwrite',
                         help='force re-write of training data npz files')
-
     args = parser.parse_args()
 
     if args.command == 'train':
@@ -66,18 +69,38 @@ if __name__ == '__main__':
         deepcell_traintest.train_model_withvalidation(model, TRAIN_DIR, VAL_DIR, nepoch=2)
 
     elif args.command == 'run':
-        inference_config = InferenceConfig()
-
         #recreate model in inference mode
+        inference_config = InferenceConfig()
         model = modellib.MaskRCNN(mode='inference',
                                   config=inference_config,
                                   model_dir=MODEL_DIR)
 
+
+        test_image_path = os.path.join(VAL_DIR, TEST_IMAGE_1)
+        image = deepcell_traintest.autotest(test_image_path)
+
+        save_name = 'mrcnn_output.tif'
+        output_save_path = os.path.join(OUTPUT_DIR, save_name)
+        tiff.imsave(output_save_path, image)
+
+
+'''
+tiff.imsave(os.path.join(output_location, cnnout_name), feature)
+
+        answers = deepcell_traintest.test(model, VAL_DIR, model_path=model_path)
+        class_names = ['BG', 'Cell']
+
+        colors = deepcell_traintest.random_colors(len(class_names))
+        class_dict = {
+            name: color for name, color in zip(class_names, colors)
+        }
+
+def test(model,testset_dir,model_path=DEFAULT_MODEL_PATH):
         model_path = model.find_last()[1]
         assert model_path != "", "Provide path to trained weights"
         print("Loading weights from ", model_path)
         model.load_weights(model_path, by_name=True)
-
+'''
 
 
 

@@ -22,7 +22,7 @@ class CellConfig(Config):
     NAME = "cell"
 
     # Adjust depending on your GPU memory
-    IMAGES_PER_GPU = 16
+    IMAGES_PER_GPU = 4
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 1  # Background + cell
@@ -80,5 +80,3 @@ class CellConfig(Config):
 
     # Max number of final detections per image
     DETECTION_MAX_INSTANCES = 1000
-
-
