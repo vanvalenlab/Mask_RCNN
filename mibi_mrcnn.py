@@ -1,10 +1,7 @@
-if __name__ == '__main__':
-    import matplotlib
-    # Agg backend runs without a display
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
 import numpy as np
 import os
+import errno                #error symbols
+import argparse             #command line input parsing
 import sys
 import json
 import datetime
@@ -20,7 +17,6 @@ from mrcnn.deepcell_config import CellConfig
 from mrcnn.deepcell_dataset import CellDataset
 from mrcnn.deepcell_inference import InferenceConfig
 from mrcnn import deepcell_traintest
-from mrcnn.deepcell_traintest import train_model_withvalidation, train_model, test, random_colors, apply_mask, display_instances
 from mrcnn import utils
 from mrcnn import utils
 from mrcnn import model as modellib
@@ -32,35 +28,60 @@ VAL_DIR = '/Mask_RCNN/data/raw_test'
 MASK_DIR = '/Mask_RCNN/data/annotated'
 MODEL_DIR = '/Mask_RCNN/models'
 COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
-# Download COCO trained weights from Releases if needed
-if not os.path.exists(COCO_MODEL_PATH):
-    utils.download_trained_weights(COCO_MODEL_PATH)
+
+
 
 config = CellConfig()
 ##config.display()
 
 
-#Create model
-model = modellib.MaskRCNN(mode="training", config=config,
-                          model_dir=MODEL_DIR)
 
-#initiate weights
-init_with = "coco"  # imagenet, coco, or last
-if init_with == "imagenet":
-    model.load_weights(model.get_imagenet_weights(), by_name=True)
-elif init_with == "coco":
-    # Load weights trained on MS COCO, but skip layers that
-    # are different due to the different number of classes
-    # See README for instructions to download the COCO weights
+
+
+def init_model():
+    # Download COCO trained weights from Releases if needed
+    if not os.path.exists(COCO_MODEL_PATH):
+        utils.download_trained_weights(COCO_MODEL_PATH)
+
+    #load COCO trained weights
     model.load_weights(COCO_MODEL_PATH, by_name=True,
                        exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
                                 "mrcnn_bbox", "mrcnn_mask"])
-elif init_with == "last":
-    # Load the last model you trained and continue training
-    model.load_weights(model.find_last()[1], by_name=True)
 
-#train model
-train_model_withvalidation(model, TRAIN_DIR, VAL_DIR)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', type=str, choices=['train', 'run', 'export'],
+                        help='train or run models')
+    parser.add_argument('-o', '--overwrite', action='store_true', dest='overwrite',
+                        help='force re-write of training data npz files')
+
+    args = parser.parse_args()
+
+    if args.command == 'train':
+        #Create model
+        model = modellib.MaskRCNN(mode="training", config=config, model_dir=MODEL_DIR)
+        init_model()
+
+        #train model
+        deepcell_traintest.train_model_withvalidation(model, TRAIN_DIR, VAL_DIR, nepoch=2)
+
+    elif args.command == 'run':
+        inference_config = InferenceConfig()
+
+        #recreate model in inference mode
+        model = modellib.MaskRCNN(mode='inference',
+                                  config=inference_config,
+                                  model_dir=MODEL_DIR)
+
+        model_path = model.find_last()[1]
+        assert model_path != "", "Provide path to trained weights"
+        print("Loading weights from ", model_path)
+        model.load_weights(model_path, by_name=True)
+
+
+
+
+
 
 
 #train_model_withvalidation(model,dataset_dir,validation_dir,nepoch=40,config=CellConfig(),datasetclass=CellDataset)
