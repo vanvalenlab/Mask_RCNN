@@ -107,7 +107,6 @@ class CellDataset(utils.Dataset):
                         newim[i][j]=1
             msks.append(newim)
         #msks=np.astype(np.bool)
-        #print (msks)
 
         # Combine these masks of indiviual cells
         mask = np.stack(msks, axis=-1)
