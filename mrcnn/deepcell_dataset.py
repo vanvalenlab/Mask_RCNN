@@ -11,7 +11,8 @@ import datetime
 import numpy as np
 import skimage.io
 import cv2
-from scipy.ndimage.measurements import label
+#from scipy.ndimage.measurements import label
+from skimage.measure import label
 ROOT_DIR = os.path.abspath("../")
 # Import Mask RCNN
 sys.path.append(ROOT_DIR)  # To find local version of the library
@@ -88,22 +89,21 @@ class CellDataset(utils.Dataset):
         for f in next(os.walk(mask_dir))[2]:
             if f.endswith(str(image_name)):
                 full_mask = cv2.imread(os.path.join(mask_dir, f),0)
-
+                
         #extract indivial masks of cells from the full mask
         lb = label(full_mask)
 
         msks = []
-        for key in range(1,lb[1]+1):
+        #for key in range(1,lb[1]+1):
+        for key in range(1, np.max(np.unique(lb))+1):       
 
-            x = lb[1]+1
-            #print(x)
-            #print(key)
-
+            #x = lb[1]+1
+            x = np.max(np.unique(lb))
 
             newim=np.zeros(full_mask.shape)
             for i in range(full_mask.shape[0]):
                 for j in range(full_mask.shape[1]):
-                    if lb[0][i][j]==key:
+                    if lb[i][j]==key:
                         newim[i][j]=1
             msks.append(newim)
         #msks=np.astype(np.bool)

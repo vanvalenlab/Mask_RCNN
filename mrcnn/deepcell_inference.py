@@ -19,8 +19,9 @@ from mrcnn.config import Config
 from mrcnn.deepcell_dataset import CellDataset
 from mrcnn import utils
 
+from mrcnn.deepcell_config import CellConfig
 
-class InferenceConfig(CellDataset):
+class InferenceConfig(CellConfig):
     # Set batch size to 1 to run one image at a time
     GPU_COUNT = 1
     IMAGES_PER_GPU = 1
@@ -29,3 +30,4 @@ class InferenceConfig(CellDataset):
     # Non-max suppression threshold to filter RPN proposals.
     #You may increse this if you have a super small or blurry segmentation object
     RPN_NMS_THRESHOLD = 0.7
+

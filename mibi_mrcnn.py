@@ -8,6 +8,8 @@ import datetime
 import numpy as np
 import skimage.io
 import cv2
+import tifffile as tiff
+
 from scipy.ndimage.measurements import label
 ROOT_DIR = os.path.abspath("../")
 # Import Mask RCNN
@@ -27,17 +29,22 @@ TRAIN_DIR = '/Mask_RCNN/data/raw_train'
 VAL_DIR = '/Mask_RCNN/data/raw_test'
 MASK_DIR = '/Mask_RCNN/data/annotated'
 MODEL_DIR = '/Mask_RCNN/models'
-OUTPUT_DIR = 'Mask_RCNN/output'
+OUTPUT_DIR = '/Mask_RCNN/output'
+WEIGHTS_PATH = '/Mask_RCNN/models/cell20180710T0023/mask_rcnn_cell_0020.h5'
 
-COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+
+#COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
+
+COCO_MODEL_PATH = './mask_rcnn_coco.h5'
 
 TEST_IMAGE_1 = 'crop14_dsDNA1.tif'
 TEST_IMAGE_2 = 'crop14_dsDNA2.tif'
 
 config = CellConfig()
-##config.display()
+#config.display()
 
-
+import warnings
+warnings.filterwarnings("ignore")
 
 
 
@@ -66,7 +73,7 @@ if __name__ == '__main__':
         init_model()
 
         #train model
-        deepcell_traintest.train_model_withvalidation(model, TRAIN_DIR, VAL_DIR, nepoch=2)
+        deepcell_traintest.train_model_withvalidation(model, TRAIN_DIR, VAL_DIR, nepoch=20)
 
     elif args.command == 'run':
         #recreate model in inference mode
@@ -77,12 +84,30 @@ if __name__ == '__main__':
 
 
         test_image_path = os.path.join(VAL_DIR, TEST_IMAGE_1)
-        image = deepcell_traintest.autotest(test_image_path)
+#        image = deepcell_traintest.autotest(test_image_path)
+#        images = deepcell_traintest.test(model, VAL_DIR, model_path=WEIGHTS_PATH)
+
+        model_path = WEIGHTS_PATH        
+        assert model_path != "", "Provide path to trained weights(The .h5 files)"
+        print("Loading weights from: ", model_path)
+        model.load_weights(model_path, by_name=True)
+
+        class_names = ['BG', 'Cell']
+        frame=skimage.io.imread(test_image_path)
+        frame=np.expand_dims(frame, axis=-1)
+ 
+        results = model.detect([frame], verbose=1)
+        r = results[0]
+        print('Mask shape is: ', r['masks'].shape)
+
+        output = deepcell_traintest.display_instances_mibi(frame, r['rois'], r['masks'], 
+                                          r['class_ids'], class_names, r['scores'])
+        print('output shape is:', output.shape)
 
         save_name = 'mrcnn_output.tif'
         output_save_path = os.path.join(OUTPUT_DIR, save_name)
-        tiff.imsave(output_save_path, image)
-
+        tiff.imsave(output_save_path, output)
+        
 
 '''
 tiff.imsave(os.path.join(output_location, cnnout_name), feature)
@@ -99,8 +124,8 @@ def test(model,testset_dir,model_path=DEFAULT_MODEL_PATH):
         model_path = model.find_last()[1]
         assert model_path != "", "Provide path to trained weights"
         print("Loading weights from ", model_path)
-        model.load_weights(model_path, by_name=True)
-'''
+        model.load_weights(model_path, by_name=True) '''
+
 
 
 

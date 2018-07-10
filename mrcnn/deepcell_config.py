@@ -22,7 +22,7 @@ class CellConfig(Config):
     NAME = "cell"
 
     # Adjust depending on your GPU memory
-    IMAGES_PER_GPU = 4
+    IMAGES_PER_GPU = 2
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 1  # Background + cell
@@ -76,7 +76,7 @@ class CellConfig(Config):
     TRAIN_ROIS_PER_IMAGE = 128
 
     # Maximum number of ground truth instances to use in one image
-    MAX_GT_INSTANCES = 400
+    MAX_GT_INSTANCES = 700
 
     # Max number of final detections per image
     DETECTION_MAX_INSTANCES = 1000

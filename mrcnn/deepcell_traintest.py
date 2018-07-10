@@ -140,6 +140,36 @@ def apply_mask(image, mask, color, alpha=1):
     return image
 
 
+def display_instances_mibi(image, boxes, masks, ids, names, scores):
+    """
+        take the image and results and apply the mask, box, and Label
+    """
+    n_instances = boxes.shape[0]
+
+    if not n_instances:
+        print('NO INSTANCES TO DISPLAY')
+    else:
+        assert boxes.shape[0] == masks.shape[-1] == ids.shape[0]
+
+    for i in range(n_instances):
+        if not np.any(boxes[i]):
+            continue
+
+        y1, x1, y2, x2 = boxes[i]
+        label = names[ids[i]]
+        color = class_dict[label]
+        score = scores[i] if scores is not None else None
+        caption = '{} {:.2f}'.format(label, score) if score else label
+        mask = masks[:, :, i]
+
+        l=[color[0]]
+
+        image = apply_mask(image, mask,tuple(l))
+
+    return image
+
+
+
 def display_instances(image, boxes, masks, ids, names, scores):
     """
         take the image and results and apply the mask, box, and Label
@@ -161,6 +191,8 @@ def display_instances(image, boxes, masks, ids, names, scores):
         score = scores[i] if scores is not None else None
         caption = '{} {:.2f}'.format(label, score) if score else label
         mask = masks[:, :, i]
+
+         
 
         image = apply_mask(image, mask, color)
 
