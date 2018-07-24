@@ -33,6 +33,8 @@ OUTPUT_DIR = '/Mask_RCNN/output'
 WEIGHTS_PATH = '/Mask_RCNN/models/cell20180710T0023/mask_rcnn_cell_0020.h5'
 
 
+N_EPOCHS = 64
+
 #COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
 COCO_MODEL_PATH = './mask_rcnn_coco.h5'
@@ -73,7 +75,7 @@ if __name__ == '__main__':
         init_model()
 
         #train model
-        deepcell_traintest.train_model_withvalidation(model, TRAIN_DIR, VAL_DIR, nepoch=20)
+        deepcell_traintest.train_model_withvalidation(model, TRAIN_DIR, VAL_DIR, nepoch=N_EPOCHS)
 
     elif args.command == 'run':
         #recreate model in inference mode

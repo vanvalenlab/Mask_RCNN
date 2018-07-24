@@ -55,6 +55,7 @@ def train_model_withvalidation(model,dataset_dir,validation_dir,nepoch=40,config
                 learning_rate=config.LEARNING_RATE,
                 epochs=nepoch//2,
                 augmentation=augmentation,
+#                verbose=2,
                 layers='heads')
 
     print("Train all layers")
@@ -62,6 +63,7 @@ def train_model_withvalidation(model,dataset_dir,validation_dir,nepoch=40,config
                 learning_rate=config.LEARNING_RATE,
                 epochs=nepoch,
                 augmentation=augmentation,
+#                verbose=2,
                 layers='all')
 
 def train_model(model,dataset_dir,nepoch=40,train_val_ratio=0.7,config=CellConfig(),datasetclass=CellDataset):
@@ -91,7 +93,7 @@ def train_model(model,dataset_dir,nepoch=40,train_val_ratio=0.7,config=CellConfi
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
                 epochs=nepoch//2,
-                augmentation=augmentation,
+                augmentation=augmentation, 
                 layers='heads')
 
     print("Train all layers")
