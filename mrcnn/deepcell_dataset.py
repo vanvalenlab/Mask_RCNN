@@ -89,15 +89,15 @@ class CellDataset(utils.Dataset):
         for f in next(os.walk(mask_dir))[2]:
             if f.endswith(str(image_name)):
                 full_mask = cv2.imread(os.path.join(mask_dir, f),0)
-#                full_mask = skimage.io.imread(os.path.join(mask_dir,f))  
+#                full_mask = skimage.io.imread(os.path.join(mask_dir,f))
 #needtoadddimension
-              
+
         #extract indivial masks of cells from the full mask
-        lb = label(full_mask)
+        #lb = label(full_mask)
 
         msks = []
         #for key in range(1,lb[1]+1):
-        for key in range(1, np.max(np.unique(lb))+1):       
+        for key in range(1, np.max(np.unique(lb))+1):
 
             #x = lb[1]+1
             x = np.max(np.unique(lb))
