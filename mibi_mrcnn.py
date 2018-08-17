@@ -1,3 +1,5 @@
+# working version
+
 import numpy as np
 import os
 import errno                #error symbols
@@ -8,7 +10,7 @@ import datetime
 import numpy as np
 import skimage.io
 import cv2
-import tifffile as tiff
+import skimage.external.tifffile as tiff
 
 from scipy.ndimage.measurements import label
 ROOT_DIR = os.path.abspath("../")
@@ -30,16 +32,17 @@ VAL_DIR = '/Mask_RCNN/data/raw_test'
 MASK_DIR = '/Mask_RCNN/data/annotated'
 MODEL_DIR = '/Mask_RCNN/models'
 OUTPUT_DIR = '/Mask_RCNN/output'
-WEIGHTS_PATH = '/Mask_RCNN/models/cell20180710T0023/mask_rcnn_cell_0020.h5'
+WEIGHTS_PATH = '/Mask_RCNN/models/cell20180726T0013/mask_rcnn_cell_0168.h5'
 
+OUTPUT_DATATYPE = 'float16'
+OUTPUT_MASK_TYPE = 'uint16'
 
-N_EPOCHS = 64
-
+N_EPOCHS = 168 
 #COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
 COCO_MODEL_PATH = './mask_rcnn_coco.h5'
 
-TEST_IMAGE_1 = 'crop14_dsDNA1.tif'
+TEST_IMAGE_1 = 'crop2_dsDNA1.tif'
 TEST_IMAGE_2 = 'crop14_dsDNA2.tif'
 
 config = CellConfig()
@@ -52,13 +55,15 @@ warnings.filterwarnings("ignore")
 
 def init_model():
     # Download COCO trained weights from Releases if needed
-    if not os.path.exists(COCO_MODEL_PATH):
-        utils.download_trained_weights(COCO_MODEL_PATH)
+#    if not os.path.exists(COCO_MODEL_PATH):
+#        utils.download_trained_weights(COCO_MODEL_PATH)
 
     #load COCO trained weights
     model.load_weights(COCO_MODEL_PATH, by_name=True,
                        exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
                                 "mrcnn_bbox", "mrcnn_mask"])
+
+#    model.load_weights(WEIGHTS_PATH)
 
 if __name__ == '__main__':
     #parse command line input to either train or run mrcnn
@@ -96,7 +101,9 @@ if __name__ == '__main__':
 
         class_names = ['BG', 'Cell']
         frame=skimage.io.imread(test_image_path)
-        frame=np.expand_dims(frame, axis=-1)
+
+        #if input is grayscale, uncomment this line
+        #frame=np.expand_dims(frame, axis=-1)
  
         results = model.detect([frame], verbose=1)
         r = results[0]
@@ -108,8 +115,46 @@ if __name__ == '__main__':
 
         save_name = 'mrcnn_output.tif'
         output_save_path = os.path.join(OUTPUT_DIR, save_name)
-        tiff.imsave(output_save_path, output)
-        
+        tiff.imsave(output_save_path, output.astype(OUTPUT_DATATYPE) )
+
+ 
+        x, y = output.shape[0], output.shape[1]       
+        mask_over_dsDNA = np.zeros((x,y))
+        mask_over_dsDNA = output[:,:,0]
+        tiff.imsave( os.path.join(OUTPUT_DIR, 'mrcnn_dsDNA_mask.tif'), mask_over_dsDNA.astype(OUTPUT_MASK_TYPE)  )
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 '''
 tiff.imsave(os.path.join(output_location, cnnout_name), feature)

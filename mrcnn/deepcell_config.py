@@ -22,7 +22,7 @@ class CellConfig(Config):
     NAME = "cell"
 
     # Adjust depending on your GPU memory
-    IMAGES_PER_GPU = 2
+    IMAGES_PER_GPU = 2 
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 1  # Background + cell

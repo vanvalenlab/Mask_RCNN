@@ -28,6 +28,7 @@ DEFAULT_MODEL_PATH=os.path.join(ROOT_DIR,"mask_rcnn_nucleus_0040.h5")
 
 def train_model_withvalidation(model,dataset_dir,validation_dir,nepoch=40,config=CellConfig(),datasetclass=CellDataset):
     """Train the model."""
+
     # Training dataset.
     dataset_train = CellDataset()
     dataset_train.load_trainingcells(dataset_dir)
@@ -195,8 +196,9 @@ def display_instances(image, boxes, masks, ids, names, scores):
         mask = masks[:, :, i]
 
          
-
         image = apply_mask(image, mask, color)
+ 
+        just_mask = np.zeros(image.shape)
 
     return image
 
