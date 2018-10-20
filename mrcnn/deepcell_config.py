@@ -22,14 +22,14 @@ class CellConfig(Config):
     NAME = "cell"
 
     # Adjust depending on your GPU memory
-    IMAGES_PER_GPU = 2
+    IMAGES_PER_GPU = 1 
 
     # Number of classes (including background)
     NUM_CLASSES = 1 + 1  # Background + cell
 
     # Number of training and validation steps per epoch
-    STEPS_PER_EPOCH = 500//IMAGES_PER_GPU
-    VALIDATION_STEPS = 10
+    STEPS_PER_EPOCH = 1000//IMAGES_PER_GPU
+    VALIDATION_STEPS = 80
 
     # Don't exclude based on confidence. Since we have two classes
     # then 0.5 is the minimum anyway as it picks between nucleus and BG
@@ -42,9 +42,9 @@ class CellConfig(Config):
     # Input image resizing
     # Random crops of size 512x512
     IMAGE_RESIZE_MODE = "crop"
-    IMAGE_MIN_DIM = 256
+    IMAGE_MIN_DIM = 256 
     IMAGE_MAX_DIM = 256
-    IMAGE_MIN_SCALE = 2.0
+    IMAGE_MIN_SCALE = 2 
 
     # Length of square anchor side in pixels
     RPN_ANCHOR_SCALES = (8, 16, 32, 64, 128)

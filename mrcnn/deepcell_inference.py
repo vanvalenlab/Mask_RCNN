@@ -31,3 +31,18 @@ class InferenceConfig(CellConfig):
     #You may increse this if you have a super small or blurry segmentation object
     RPN_NMS_THRESHOLD = 0.7
 
+
+
+class InferenceConfigLarge(CellConfig):
+    # Set batch size to 1 to run one image at a time
+    GPU_COUNT = 1
+    IMAGES_PER_GPU = 1
+    # Don't resize imager for inferencing
+    IMAGE_RESIZE_MODE = "pad64"
+    # Non-max suppression threshold to filter RPN proposals.
+    #You may increse this if you have a super small or blurry segmentation object
+    RPN_NMS_THRESHOLD = 0.7
+
+    # Max number of final detections per image
+    DETECTION_MAX_INSTANCES = 7000
+

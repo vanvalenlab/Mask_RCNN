@@ -28,22 +28,22 @@ from mrcnn import visualize
 from imgaug import augmenters as iaa
 
 TRAIN_DIR = '/Mask_RCNN/data/raw_train'
-VAL_DIR = '/Mask_RCNN/data/raw_test'
+VAL_DIR = '/Mask_RCNN/data/raw_train'
 MASK_DIR = '/Mask_RCNN/data/annotated'
 MODEL_DIR = '/Mask_RCNN/models'
 OUTPUT_DIR = '/Mask_RCNN/output'
-WEIGHTS_PATH = '/Mask_RCNN/models/cell20180726T0013/mask_rcnn_cell_0168.h5'
+WEIGHTS_PATH = '/Mask_RCNN/models/cell20180822T0142/mask_rcnn_cell_0069.h5'
 
 OUTPUT_DATATYPE = 'float16'
 OUTPUT_MASK_TYPE = 'uint16'
 
-N_EPOCHS = 168 
+N_EPOCHS = 100 
 #COCO_MODEL_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 
 COCO_MODEL_PATH = './mask_rcnn_coco.h5'
 
-TEST_IMAGE_1 = 'crop2_dsDNA1.tif'
-TEST_IMAGE_2 = 'crop14_dsDNA2.tif'
+TEST_IMAGE_1 = 'crop0_dsDNA3.tif'
+TEST_IMAGE_2 = 'crop6_dsDNA5.tif'
 
 config = CellConfig()
 #config.display()
@@ -59,11 +59,11 @@ def init_model():
 #        utils.download_trained_weights(COCO_MODEL_PATH)
 
     #load COCO trained weights
-    model.load_weights(COCO_MODEL_PATH, by_name=True,
-                       exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
-                                "mrcnn_bbox", "mrcnn_mask"])
+#    model.load_weights(COCO_MODEL_PATH, by_name=True,
+#                       exclude=["mrcnn_class_logits", "mrcnn_bbox_fc",
+#                                "mrcnn_bbox", "mrcnn_mask"])
 
-#    model.load_weights(WEIGHTS_PATH)
+    model.load_weights(WEIGHTS_PATH)
 
 if __name__ == '__main__':
     #parse command line input to either train or run mrcnn
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                                   model_dir=MODEL_DIR)
 
 
-        test_image_path = os.path.join(VAL_DIR, TEST_IMAGE_1)
+        test_image_path = os.path.join(VAL_DIR, TEST_IMAGE_2)
 #        image = deepcell_traintest.autotest(test_image_path)
 #        images = deepcell_traintest.test(model, VAL_DIR, model_path=WEIGHTS_PATH)
 
@@ -101,6 +101,8 @@ if __name__ == '__main__':
 
         class_names = ['BG', 'Cell']
         frame=skimage.io.imread(test_image_path)
+
+        dsDNA = np.copy(frame[:,:,0])
 
         #if input is grayscale, uncomment this line
         #frame=np.expand_dims(frame, axis=-1)
@@ -122,7 +124,7 @@ if __name__ == '__main__':
         mask_over_dsDNA = np.zeros((x,y))
         mask_over_dsDNA = output[:,:,0]
         tiff.imsave( os.path.join(OUTPUT_DIR, 'mrcnn_dsDNA_mask.tif'), mask_over_dsDNA.astype(OUTPUT_MASK_TYPE)  )
-       
+        tiff.imsave( os.path.join(OUTPUT_DIR, 'raw_dsDNA.tif'), dsDNA ) 
 
 
 

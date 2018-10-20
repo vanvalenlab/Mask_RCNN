@@ -88,19 +88,31 @@ class CellDataset(utils.Dataset):
         #Get the exact full mask for that image
         for f in next(os.walk(mask_dir))[2]:
             if f.endswith(str(image_name)):
-                full_mask = cv2.imread(os.path.join(mask_dir, f),0)
-#                full_mask = skimage.io.imread(os.path.join(mask_dir,f))
+#                full_mask = cv2.imread(os.path.join(mask_dir, f),0)
+                full_mask = skimage.io.imread(os.path.join(mask_dir,f))
 #needtoadddimension
 
         #extract indivial masks of cells from the full mask
-        #lb = label(full_mask)
+        
+        if (np.max(np.unique(full_mask)) > 3):
+          
+            lb = full_mask
+            lb = lb.astype('int32')  
+        #if masks are not uniquely annotated, label them as such
+        else:
+            print('labeling')
+            lb = label(full_mask)
+
 
         msks = []
         #for key in range(1,lb[1]+1):
-        for key in range(1, np.max(np.unique(lb))+1):
+#        for key in range(1, np.max(np.unique(lb))+1):
+        for key in np.unique(lb):
+            if key == 0:
+                continue
 
             #x = lb[1]+1
-            x = np.max(np.unique(lb))
+            #x = np.max(np.unique(lb))
 
             newim=np.zeros(full_mask.shape)
             for i in range(full_mask.shape[0]):
@@ -111,7 +123,12 @@ class CellDataset(utils.Dataset):
         #msks=np.astype(np.bool)
 
         # Combine these masks of indiviual cells
-        mask = np.stack(msks, axis=-1)
+        if np.max(np.unique(lb))>2:
+            mask = np.stack(msks, axis=-1)
+
+        else:
+            mask = []
+
         # Return mask, and array of class IDs of each instance. Since we have
         # one class ID, we return an array of ones
         return mask, np.ones([mask.shape[-1]], dtype=np.int32)
